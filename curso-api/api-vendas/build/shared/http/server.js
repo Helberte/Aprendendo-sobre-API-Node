@@ -11,5 +11,5 @@ app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(routes_1.default);
 app.listen(3333, () => {
-    console.log('Server started on port 3333');
+    console.log('Server started on port 3333!');
 });

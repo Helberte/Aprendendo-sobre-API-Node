@@ -1,20 +1,19 @@
 {
   "compilerOptions": {
-    "target": "es2016",                            
-    "experimentalDecorators": true,               
-    "emitDecoratorMetadata": true,                
-    "module": "commonjs",                         
-    "rootDir": "./src",                           
-    "moduleResolution": "node",                   
-    "baseUrl": ".",                               
-    "resolveJsonModule": true,                    
-    "allowJs": true,                               
-    "outDir": "./build",                          
-    "esModuleInterop": true,                       
-    "forceConsistentCasingInFileNames": true,     
-    "strict": true,       
-    "strictPropertyInitialization": false,       
-    "skipLibCheck": true                           
+    "target": "es2016",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",        
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": "./build",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*"
