@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2016",           
+    "module": "commonjs",                           
+    "baseUrl": ".",                                  
+    "resolveJsonModule": true,                      
+    "outDir": "dist",                             
+    "esModuleInterop": true,                          
+    "forceConsistentCasingInFileNames": true,        
+    "strict": true,                                   
+    "noImplicitAny": true,                           
+    "strictNullChecks": true,                 
+    "skipLibCheck": true                             
+  },
+  "include": [
+    "App.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

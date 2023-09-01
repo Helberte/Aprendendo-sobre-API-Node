@@ -1,0 +1,14 @@
+{
+  "name": "leitura-documentacao-typescript",
+  "version": "1.0.0",
+  "description": "Anotações do estudo da documentação do typescript",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "tsc --build && node dist/app.js"
+  },
+  "author": "Helberte",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^5.2.2"
+  }
+}
