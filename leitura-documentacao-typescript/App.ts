@@ -518,362 +518,582 @@ console.log(primeiroElemento([{ numero: 15}, { teste: 20 }, {outroTeste: 30}]));
 console.log(primeiroElemento([15,20,30,4,50]));
 
 type funcaoPropriedade = {
-    descricao: string,
-    new (p: string): Pessoa2
+  descricao: string,
+  new (p: string): Pessoa2
+}
+
+class Pessoa2{
+  private nome: string;
+
+  constructor(nome: string) {
+    this.nome = nome;
   }
-  
-  class Pessoa2{
-    private nome: string;
-  
-    constructor(nome: string) {
-      this.nome = nome;
-    }
-  
-    public getNome() : string {
-      return this.nome;
-    }
+
+  public getNome() : string {
+    return this.nome;
   }
-  
-  function myName (d: string, n: funcaoPropriedade){
-    return new n(d);
+}
+
+function myName (d: string, n: funcaoPropriedade){
+  return new n(d);
+}
+
+(Pessoa2 as funcaoPropriedade).descricao = 'Uma funcão que retorna um objeto';
+const p: Pessoa2 = myName('teste', Pessoa2 as funcaoPropriedade);
+
+console.log(`Nome: ${p.getNome()}. Descricao: ${(Pessoa2 as funcaoPropriedade).descricao}`);
+
+
+function myFunctionGeneric<type>(p: type) : type | undefined{
+  return p;
+}
+
+const inteiro = myFunctionGeneric(15);
+
+
+
+
+function map<nomeQ, saida, teste>(arr: nomeQ[], func: (arg: nomeQ) => saida, param: teste): saida[] {
+  let valor = (param as number) * 10;
+
+  return arr.map(func);
+}
+
+// Parameter 'n' is of type 'string'
+// 'parsed' is of type 'number[]'
+const parsed = map(["1", "2", "3"], (n) => parseInt(n), 10);
+
+console.log(parsed);
+
+
+function calculaMedia<num1, num2, num3> (p1: num1, p2: num2, p3: num3) {
+  return ((p1 as number) * (p2 as number) * (p3 as number)) / 3; 
+} 
+
+console.log(calculaMedia('15',20,30));
+
+
+// ################### Restrições ###################
+// nas funções genericas eu consigo passar qualquer tipo por parametro
+// mas as vezes pode ser interessante passar apenas um grupo de tipos que eu queira
+// pra isso, usamos as restricoes
+
+
+type grupoValores = {
+  tamanho: number,
+  descricao: string
+}
+
+function maiorDeDois<Type extends grupoValores>(valor: Type, valor2: Type) {
+  if(valor.tamanho > valor2.tamanho ){
+    return valor.tamanho;
   }
-  
-  (Pessoa2 as funcaoPropriedade).descricao = 'Uma funcão que retorna um objeto';
-  const p: Pessoa2 = myName('teste', Pessoa2 as funcaoPropriedade);
-  
-  console.log(`Nome: ${p.getNome()}. Descricao: ${(Pessoa2 as funcaoPropriedade).descricao}`);
-  
-  
-  function myFunctionGeneric<type>(p: type) : type | undefined{
-    return p;
+  return valor2.tamanho;
+}
+
+function maiorDeDois2<Type extends { tamanho: number}>(valor: Type, valor2: Type) {
+  if(valor.tamanho > valor2.tamanho ){
+    return valor.tamanho;
   }
-  
-  const inteiro = myFunctionGeneric(15);
-  
-  
-  
-  
-  function map<nomeQ, saida, teste>(arr: nomeQ[], func: (arg: nomeQ) => saida, param: teste): saida[] {
-    let valor = (param as number) * 10;
-  
-    return arr.map(func);
+  return valor2.tamanho;
+}
+
+console.log('Maior: ' + maiorDeDois ({tamanho: 15, descricao: ''}, {tamanho: 17, descricao: ''})) 
+console.log('Maior: ' + maiorDeDois2({tamanho: 150 },{tamanho: 17 }));
+
+function minimumLength<Type extends { length: number }>(obj: Type, minimum: number ): Type {
+  if (obj.length >= minimum) {
+    return obj;
+  } else {
+    return { length: minimum } as Type;
   }
+}
+
+console.log (minimumLength({ length: 15}, 100));
+
+
+// juntando array
+
+function juntaArray<Type>(arr1: Type[], arr2: Type[]) : Type[]{
+  return arr1.concat(arr2);
+}
+
+console.log(juntaArray<number | string>([1,2,3,4,5,6,7,8,9,10], ['1', '3']));
+
+
+
+function funcaoGenerica<Type>(p1: Type, p2: Type, p3: Type) : Type{
+  return (p1 + ' - ' + p2 + ' - ' + p3) as Type;
+}
+
+// nem sempre o typescript infere o tipo de dado que está sendo passado
+// para isso, colocamos o tipo que vamos passar por parametro explicitamente
+
+console.log(funcaoGenerica<string | string | number>('primeiro param', 'segundo param', 15));
+
+
+function firstElement1<Type>(arr: Type[]) {
+  return arr[0];
+}
   
-  // Parameter 'n' is of type 'string'
-  // 'parsed' is of type 'number[]'
-  const parsed = map(["1", "2", "3"], (n) => parseInt(n), 10);
+function firstElement2<Type extends any[]>(arr: Type) {
+  return arr[0];
+}
   
-  console.log(parsed);
-  
-  
-  function calculaMedia<num1, num2, num3> (p1: num1, p2: num2, p3: num3) {
-    return ((p1 as number) * (p2 as number) * (p3 as number)) / 3; 
-  } 
-  
-  console.log(calculaMedia('15',20,30));
-  
-  
-  // ################### Restrições ###################
-  // nas funções genericas eu consigo passar qualquer tipo por parametro
-  // mas as vezes pode ser interessante passar apenas um grupo de tipos que eu queira
-  // pra isso, usamos as restricoes
-  
-  
-  type grupoValores = {
-    tamanho: number,
-    descricao: string
+// a: number (good)
+const a = firstElement1([1, 2, 3]);
+// b: any (bad)
+const b = firstElement2([1, 2, 3]);
+
+// ############################################################################################ //
+// Regra : Se um parâmetro de tipo aparecer apenas em um local, reconsidere fortemente se você realmente precisa dele
+
+function filter1<Type>(arr: Type[], func: (arg: Type) => boolean): Type[] {
+  return arr.filter(func);
+}
+
+function procura(n: number) : boolean {
+  return n === 8 || n === 9;
+}
+
+var arr: number[] = [1,2,3,4,5,6,7,8,9,10];
+
+console.log(filter1(arr, procura));
+
+
+function filter2<Type, Func extends (arg: Type) => boolean>(arr: Type[],func: Func ): Type[] {
+
+  return arr.filter(func);
+}
+
+console.log(filter2(arr, procura));
+
+
+// ######################################## Parâmetros opcionais ########################################
+
+
+function f(x: number = 10) {
+  console.log(x);
+}
+f();
+f(150);
+
+
+function f2(x?: number) {
+  console.log(x);
+}
+f2();
+f2(150);
+f2(undefined);
+
+// Regra : Ao escrever um tipo de função para um retorno de chamada, nunca escreva um parâmetro opcional, 
+// a menos que pretenda chamar a função sem passar esse argumento
+
+function meyForEach(arr: any[], callback: (arg: any, index?: number) => void) {
+  for(let i = 0; i < arr.length; i++){
+    callback(arr[i], i);
   }
-  
-  function maiorDeDois<Type extends grupoValores>(valor: Type, valor2: Type) {
-    if(valor.tamanho > valor2.tamanho ){
-      return valor.tamanho;
-    }
-    return valor2.tamanho;
+}
+
+meyForEach([1,2,3,4,5,6,7,8,9,10], (a: any) => console.log(a));
+meyForEach([1,2,3,4,5,6,7,8,9,10], (a, b)   => console.log(a, b));
+
+
+// ######################################## Sobrecargas de função ########################################
+
+
+function makeDate(timestamp: number): Date;
+function makeDate(m: number, d: number, y: number): Date;
+function makeDate(mOrTimestamp: number, d?: number, y?: number): Date {
+  if (d !== undefined && y !== undefined) {
+    return new Date(y, mOrTimestamp, d);
+  } else {
+    return new Date(mOrTimestamp);
   }
+}
+const d1 = makeDate(12345678);
+const d2 = makeDate(5, 5, 5);
+
+console.log('Resultado: ' + d1 + ' || ' + d2);
+
+function minhaSobrecarga(primeiroNome: string) : string;                        // primeira sobrecarga
+function minhaSobrecarga(primeiroNome: string, segundoNome: string) : string;   // sobrecarga
+function minhaSobrecarga(primeiroNome: string, segundoNome?: string) : string{  // linha de implementação, não é vista
   
-  function maiorDeDois2<Type extends { tamanho: number}>(valor: Type, valor2: Type) {
-    if(valor.tamanho > valor2.tamanho ){
-      return valor.tamanho;
-    }
-    return valor2.tamanho;
+  if(segundoNome)
+    return primeiroNome + ' ' + segundoNome;
+  return primeiroNome;  
+}
+
+console.log(minhaSobrecarga('helberte'));
+console.log(minhaSobrecarga('helberte', 'costa'));
+
+function fnc(x: boolean): void;
+function fnc(x: boolean, y: string): void;
+function fnc(x: boolean, y?: string) : void{}
+
+function fn2(x: string): string;
+function fn2(x: number): boolean;
+function fn2(x: string | number) : string | boolean {
+  return "oops";
+}
+
+// funcao que retorna o tamnho de um array ou string
+
+function tamanho(s: string): number;
+function tamanho(arr: any[]): number;
+function tamanho(x: any) {
+  return x.length;
+}
+
+// ##################### Sempre prefira parâmetros com tipos de união em vez de sobrecargas quando possível #####################
+
+console.log(tamanho('my name is fulano of tal'));
+console.log(tamanho([1,2,3,4,5,6,7,8,9,10]));
+
+// ##################### Declarando this em uma Função #####################
+
+
+
+const user = {
+  id: 123,
+  admin: false,
+
+  adicionaAdmin: function () {
+    this.admin = true;
   }
-  
-  console.log('Maior: ' + maiorDeDois ({tamanho: 15, descricao: ''}, {tamanho: 17, descricao: ''})) 
-  console.log('Maior: ' + maiorDeDois2({tamanho: 150 },{tamanho: 17 }));
-  
-  function minimumLength<Type extends { length: number }>(obj: Type, minimum: number ): Type {
-    if (obj.length >= minimum) {
-      return obj;
-    } else {
-      return { length: minimum } as Type;
-    }
+}
+
+
+interface DB {
+  filterUsers(filter: (this: User) => boolean): User[];
+}
+
+class User{
+  public admin: boolean = false;
+}
+class Banco implements DB {
+
+  filterUsers(filter: (this: User) => boolean): User[] {
+    return [];
   }
-  
-  console.log (minimumLength({ length: 15}, 100));
-  
-  
-  // juntando array
-  
-  function juntaArray<Type>(arr1: Type[], arr2: Type[]) : Type[]{
-    return arr1.concat(arr2);
-  }
-  
-  console.log(juntaArray<number | string>([1,2,3,4,5,6,7,8,9,10], ['1', '3']));
-  
-  
-  
-  function funcaoGenerica<Type>(p1: Type, p2: Type, p3: Type) : Type{
-    return (p1 + ' - ' + p2 + ' - ' + p3) as Type;
-  }
-  
-  // nem sempre o typescript infere o tipo de dado que está sendo passado
-  // para isso, colocamos o tipo que vamos passar por parametro explicitamente
-  
-  console.log(funcaoGenerica<string | string | number>('primeiro param', 'segundo param', 15));
-  
-  
-  function firstElement1<Type>(arr: Type[]) {
-    return arr[0];
-  }
-   
-  function firstElement2<Type extends any[]>(arr: Type) {
-    return arr[0];
-  }
-   
-  // a: number (good)
-  const a = firstElement1([1, 2, 3]);
-  // b: any (bad)
-  const b = firstElement2([1, 2, 3]);
-  
-  // ############################################################################################ //
-  // Regra : Se um parâmetro de tipo aparecer apenas em um local, reconsidere fortemente se você realmente precisa dele
-  
-  function filter1<Type>(arr: Type[], func: (arg: Type) => boolean): Type[] {
-    return arr.filter(func);
-  }
-  
-  function procura(n: number) : boolean {
-    return n === 8 || n === 9;
-  }
-  
-  var arr: number[] = [1,2,3,4,5,6,7,8,9,10];
-  
-  console.log(filter1(arr, procura));
-  
-  
-  function filter2<Type, Func extends (arg: Type) => boolean>(arr: Type[],func: Func ): Type[] {
-  
-    return arr.filter(func);
-  }
-  
-  console.log(filter2(arr, procura));
-  
-  
-  // ######################################## Parâmetros opcionais ########################################
-  
-  
-  function f(x: number = 10) {
-    console.log(x);
-  }
-  f();
-  f(150);
-  
-  
-  function f2(x?: number) {
-    console.log(x);
-  }
-  f2();
-  f2(150);
-  f2(undefined);
-  
-  // Regra : Ao escrever um tipo de função para um retorno de chamada, nunca escreva um parâmetro opcional, 
-  // a menos que pretenda chamar a função sem passar esse argumento
-  
-  function meyForEach(arr: any[], callback: (arg: any, index?: number) => void) {
-    for(let i = 0; i < arr.length; i++){
-      callback(arr[i], i);
-    }
-  }
-  
-  meyForEach([1,2,3,4,5,6,7,8,9,10], (a: any) => console.log(a));
-  meyForEach([1,2,3,4,5,6,7,8,9,10], (a, b)   => console.log(a, b));
-  
-  
-  // ######################################## Sobrecargas de função ########################################
-  
-  
-  function makeDate(timestamp: number): Date;
-  function makeDate(m: number, d: number, y: number): Date;
-  function makeDate(mOrTimestamp: number, d?: number, y?: number): Date {
-    if (d !== undefined && y !== undefined) {
-      return new Date(y, mOrTimestamp, d);
-    } else {
-      return new Date(mOrTimestamp);
-    }
-  }
-  const d1 = makeDate(12345678);
-  const d2 = makeDate(5, 5, 5);
-  
-  console.log('Resultado: ' + d1 + ' || ' + d2);
-  
-  function minhaSobrecarga(primeiroNome: string) : string;                        // primeira sobrecarga
-  function minhaSobrecarga(primeiroNome: string, segundoNome: string) : string;   // sobrecarga
-  function minhaSobrecarga(primeiroNome: string, segundoNome?: string) : string{  // linha de implementação, não é vista
+} 
+function getDB(){
+  return new Banco();
+}
+
+const db = getDB();
+
+const admins = db.filterUsers(function (this: User) {
+  return this.admin;
+});
+
+// ##################### Outros tipos para conhecer #####################
+
+// void não é o mesmo que undefined.
+// object é todo o tipo que for diferente dos tipos primitivos
+//
+// string, number, bigint, boolean, symbol, null, undefined
+//
+// tudo diferente disso é object
+//
+// ----------------------------  I M P O R T A N T E  ----------------------------
+// //                                                                           //
+// //                 objectnão é Object. Utilize sempre object !               //
+// //                                                                           //
+// -------------------------------------------------------------------------------
+
+// unknown - qualquer coisa, parecido com any, porém mais seguro do que o any
+
+function myF(p: unknown){
+  // p.t(); // não deixa
+}
+
+function myF2(p: any){
+  p.t();
+}
+
+// o tipo Function
+// melhor evitar devido ao anytipo de retorno inseguro.
+function recebeFuncao (func: Function) {
+  return func('minha função retornando valor');
+}
+
+function passadaParametro(p: string){
+  return p;
+}
+
+console.log(recebeFuncao(passadaParametro));
+
+// ##################### Parâmetros e argumentos restantes #####################
+// Parâmetros de descanso ...m
+
+function multiply(n: number, ...m: number[]) {
+  return m.map((x) => n * x);
+}
+
+const ab = multiply(10, 1, 2, 3, 4,5,2,2,4,5,7,8,7,5,15,4,5,4,5,6,6,3,3,3,2,1,1,2,2);
+console.log(ab);
+
+
+function paramDescanso(sep: string, ...p: string[] ){
+  return p.join(sep);
+}
+
+console.log(paramDescanso(' - ', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano'));
+
+const arr1 = [1, 2, 3];
+const arr2 = [4, 5, 6,7,8,9,10];
+arr1.push(...[1,2,3,4,5,6,7,8]);
+
+console.log(arr1);
+
+const args = [8, 5] as const;
+const angle = Math.atan2(...args);
+
+// ############################# Desestruturação de parâmetros #############################
+// ############################# Atribuição de Funções         #############################
     
-    if(segundoNome)
-      return primeiroNome + ' ' + segundoNome;
-    return primeiroNome;  
+type voidFunc = () => void;
+  
+const myFu: voidFunc = () => true;
+const myFu2: voidFunc = () => {
+  console.log('teste');
+  return 'fala meu povo!';
+};
+
+// o retorno continua como void
+const v1 = myFu();
+const v2 = myFu2();
+
+console.log(v1);
+console.log(v2);
+
+const arrTop = [1,2,3,4,5,6,7,8,9,10];
+const arrSecond = [1];
+
+arrTop.forEach((a) => arrSecond.push(a));
+
+console.log(arrTop);
+console.log(arrSecond);
+  
+// #######################################################################
+//                            Tipos de objetos
+// #######################################################################
+
+interface IPessoa{
+  nome: string;
+  idade?: number;
+  titulo?: number;
+  readonly cpf?: number;
+}
+
+function processaPessoa({nome, idade = 0, titulo = 0}: IPessoa){
+  console.log('Nome: ' + nome + '. idade: ' + idade + '. titulo: ' + titulo);
+}
+
+processaPessoa({ nome: 'Helberte '});
+
+class Fulano implements IPessoa{
+  nome: string = 'fulano';
+  idade?: number;
+  titulo?: number;
+  readonly cpf?: number;
+
+  constructor(){
+    this.cpf = 15;
   }
-  
-  console.log(minhaSobrecarga('helberte'));
-  console.log(minhaSobrecarga('helberte', 'costa'));
-  
-  function fnc(x: boolean): void;
-  function fnc(x: boolean, y: string): void;
-  function fnc(x: boolean, y?: string) : void{}
-  
-  function fn2(x: string): string;
-  function fn2(x: number): boolean;
-  function fn2(x: string | number) : string | boolean {
-    return "oops";
+
+  public teste(){
+    // this.cpf = 15;
   }
+}
+
+// ################################### 02/09/2023 ##########################################
+
+
+interface SomeType {
+  readonly prop: string;  
+}
+
+function doSomething(obj: SomeType) {
   
-  // funcao que retorna o tamnho de um array ou string
-  
-  function tamanho(s: string): number;
-  function tamanho(arr: any[]): number;
-  function tamanho(x: any) {
-    return x.length;
+  console.log(`prop has the value '${obj.prop}'.`);
+
+  // obj.prop = "hello";
+}
+
+// quando marcamos um objeto como readonly, estamos marcando apenas o objeto em sibling
+// e não as suas propriedades, ou seja, ainda será possível alterar as propriedades
+
+interface Casa{
+  readonly residente: { nome: string, idade: number };
+}
+
+function visitaCasa(casa: Casa){
+ 
+  for (let i = 0; i < 2; i++) {
+    console.log(casa.residente.idade++);
   }
-  
-  // ##################### Sempre prefira parâmetros com tipos de união em vez de sobrecargas quando possível #####################
-  
-  console.log(tamanho('my name is fulano of tal'));
-  console.log(tamanho([1,2,3,4,5,6,7,8,9,10]));
-  
-  // ##################### Declarando this em uma Função #####################
-  
-  
-  
-  const user = {
-    id: 123,
-    admin: false,
-  
-    adicionaAdmin: function () {
-      this.admin = true;
-    }
+}
+
+visitaCasa({ residente: { nome: 'Helberte', idade: 24}});
+
+interface PessoaTeste{
+  readonly pessoa: { nome: string }
+}
+
+interface ReadOnlyPessoa {
+  readonly pessoa: { readonly nome: string }
+}
+
+function alteraPessoa(p1: PessoaTeste, p2: ReadOnlyPessoa){
+  p1.pessoa.nome = "My name is Helberte";
+  // p2.pessoa.nome = "teste";
+}
+var objetoPessoa: PessoaTeste = { pessoa: { nome: 'fulano' } };
+
+var maisTeste: ReadOnlyPessoa = objetoPessoa;
+
+console.log(maisTeste.pessoa.nome);
+
+// ###################################################################################################
+// ###################################### Assinaturas de índice ######################################
+// ###################################################################################################
+
+
+
+
+interface StringArray {
+  index: string[];
+}
+interface SintaxeDiff {
+  [index: number]: string;
+}
+
+const myArray: StringArray = { index: ['teste', 'helberte', 'arruda']};
+const myArray2: SintaxeDiff = ['teste', 'helberte', 'arruda'];
+
+console.log(myArray.index[1]);
+console.log(myArray2[1]);
+
+interface Animal {
+  name: string;
+}
+ 
+interface Dog extends Animal {
+  raca: string;
+} 
+ 
+interface NotOkay {
+  [x: number]: Animal;
+}
+
+// eu preciso percorrer toda a estrutura do objeto, porém eu não sei os nomes e nem
+// as quantidades de propriedades deste objeto
+// o que eu sei?
+// sei apenas que preciso acessar as propriedades por string = nome_da_propriedade
+// e sei que ela vão me retornar number
+
+// explicação
+// https://dmitripavlutin.com/typescript-index-signatures/
+
+const salarios = {
+  base: 1520,
+  bonus: 500,
+  acrescimo: 1520,
+  gratificacao: 1520,
+  vale: 1520,
+  saude: 1520,
+  odontologico: 1520,
+}
+
+function somaSalario(myObject: { [index: string]: number }) : number{
+  var total: number = 0;
+
+  for(const item in myObject){
+    total += myObject[item];
   }
-  
-  
-  interface DB {
-    filterUsers(filter: (this: User) => boolean): User[];
-  }
-  
-  class User{
-    public admin: boolean = false;
-  }
-  class Banco implements DB {
-  
-    filterUsers(filter: (this: User) => boolean): User[] {
-      return [];
-    }
-  } 
-  function getDB(){
-    return new Banco();
-  }
-  
-  const db = getDB();
-  
-  const admins = db.filterUsers(function (this: User) {
-    return this.admin;
-  });
-  
-  // ##################### Outros tipos para conhecer #####################
-  
-  // void não é o mesmo que undefined.
-  // object é todo o tipo que for diferente dos tipos primitivos
-  //
-  // string, number, bigint, boolean, symbol, null, undefined
-  //
-  // tudo diferente disso é object
-  //
-  // ----------------------------  I M P O R T A N T E  ----------------------------
-  // //                                                                           //
-  // //                 objectnão é Object. Utilize sempre object !               //
-  // //                                                                           //
-  // -------------------------------------------------------------------------------
-  
-  // unknown - qualquer coisa, parecido com any, porém mais seguro do que o any
-  
-  function myF(p: unknown){
-   // p.t(); // não deixa
-  }
-  
-  function myF2(p: any){
-    p.t();
-  }
-  
-  // o tipo Function
-  // melhor evitar devido ao anytipo de retorno inseguro.
-  function recebeFuncao (func: Function) {
-    return func('minha função retornando valor');
-  }
-  
-  function passadaParametro(p: string){
-    return p;
-  }
-  
-  console.log(recebeFuncao(passadaParametro));
-  
-  // ##################### Parâmetros e argumentos restantes #####################
-  // Parâmetros de descanso ...m
-  
-  function multiply(n: number, ...m: number[]) {
-    return m.map((x) => n * x);
-  }
-  
-  const ab = multiply(10, 1, 2, 3, 4,5,2,2,4,5,7,8,7,5,15,4,5,4,5,6,6,3,3,3,2,1,1,2,2);
-  console.log(ab);
-  
-  
-  function paramDescanso(sep: string, ...p: string[] ){
-    return p.join(sep);
-  }
-  
-  console.log(paramDescanso(' - ', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano', 'fulano'));
-  
-  const arr1 = [1, 2, 3];
-  const arr2 = [4, 5, 6,7,8,9,10];
-  arr1.push(...[1,2,3,4,5,6,7,8]);
-  
-  console.log(arr1);
-  
-  const args = [8, 5] as const;
-  const angle = Math.atan2(...args);
-  
-  // ############################# Desestruturação de parâmetros #############################
-  // ############################# Atribuição de Funções         #############################
-      
-  type voidFunc = () => void;
-    
-  const myFu: voidFunc = () => true;
-  const myFu2: voidFunc = () => {
-    console.log('teste');
-    return 'fala meu povo!';
+
+  return total;
+}
+
+console.log(somaSalario(salarios))
+
+// ------------------------------------------------------------------------------------------------------------------
+
+type assinaturaIndex = {
+  [index: string]: string
+}
+
+const myVar: assinaturaIndex = {
+  'chave1': 'helberte',
+  'chave2': 'costa',
+  'chave3': 'arruda'
+}
+
+console.log(myVar['chave1']);
+
+
+interface Fulano {
+  [index: string]: number | boolean | string;
+  teste: string
+}
+
+const meuIrmao: Fulano = {
+  teste: 'meu teste',
+  idade: 15,
+  vivo: true
+}
+
+console.log(meuIrmao['idade']);
+
+// ################################## Excesso de verificações de propriedade ##################################
+
+interface SquareConfig {
+  color?: string;
+  width?: number;
+  [index: string]: any
+}
+ 
+function createSquare(config: SquareConfig): { color: string; area: number } {
+  return {
+    color: config.color || "red",
+    area: config.width ? config.width * config.width : 20,
   };
-  
-  // o retorno continua como void
-  const v1 = myFu();
-  const v2 = myFu2();
-  
-  console.log(v1);
-  console.log(v2);
-  
-  const arrTop = [1,2,3,4,5,6,7,8,9,10];
-  const arrSecond = [1];
-  
-  arrTop.forEach((a) => arrSecond.push(a));
-  
-  console.log(arrTop);
-  console.log(arrSecond);
-  
+}
+
+let mySquare = createSquare({ color: "", width: undefined, opacity: 1.5 });
+
+console.log(mySquare);
+
+// ################################## Estendendo Tipos ##################################
+
+interface ICarro{
+  qtdPorta: number;
+}
+
+interface IFiat {
+  preco: number;
+}
+
+interface IFiatArgo extends ICarro, IFiat {
+  computadorBordo: boolean;
+}
+
+// ################################## Tipos de interseção ##################################
+
+interface Colorful {
+  color: string;
+}
+interface Circle {
+  radius: number;
+}
+ 
+// Aqui, cruzamos Colorfule Circleproduzimos um novo tipo que possui todos os membros de Colorful e Circle.
+
+type ColorfulCircle = Colorful & Circle;
+
+const myIntersecao: ColorfulCircle = { color: 'red', radius: 1.55 };
+
+// ################################## Interfaces vs. Interseções ##################################
